@@ -1,0 +1,173 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "baseResourceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource"
+            },
+            "maxLength": 15,
+            "defaultValue": "[uniqueString(resourceGroup().id)]"
+        },
+        "appServiceResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Resource Group to deploy the App Services to, defaults to the current resource group for the deployment"
+            },
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "keyVaultResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Resource Group to deploy the Key Vaults to, defaults to the current resource group for the deployment"
+            },
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "storageResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Resource Group to deploy the storage accounts & log analytics workspaces for diagnostics and Customer assets defaults to the current resource group for the deployment"
+            },
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "azureSQLResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Resource Group to deploy the SQL Server to, defaults to the current resource group for the deployment"
+            },
+            "defaultValue": "[resourceGroup().name]"
+        },
+        "LogsWorkspaceLocation": {
+            "type": "string",
+            "allowedValues": [
+                "eastus",
+                "westeurope",
+                "southeastasia",
+                "australiasoutheast",
+                "westcentralus",
+                "japaneast",
+                "uksouth",
+                "centralindia",
+                "canadacentral"
+            ],
+            "defaultValue": "westeurope",
+            "metadata": {
+                "description": "The Azure region the Logs Workspace will be deployed to"
+            }
+        },
+        "LogAnalyticsSKU": {
+            "type": "string",
+            "defaultValue": "pergb2018",
+            "allowedValues": [
+                "Free",
+                "pergb2018"
+            ],
+            "metadata": {
+                "description": "The pricing tier of the Log Analytics workspace.  New workspaces should be ok 'pergb2018', some subscritpions may require 'Free' please see http://aka.ms/PricingTierWarning"
+            }
+        },
+        "databaseServerName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of the database server to provision"
+            },
+            "defaultValue": "[concat('svr-', uniqueString(resourceGroup().id))]"
+        },
+        "sqlServerAdminPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password for administering the SQL Server, this should be at least 8 characters and a mix of case and numerics - please see https://docs.microsoft.com/en-us/sql/relational-databases/security/strong-passwords?view=sql-server-2017 for more details."
+            }
+        },
+        "useAADForSQLAdmin": {
+            "type": "string",
+            "allowedValues": [
+                "Yes",
+                "No"
+            ],
+            "defaultValue": "No",
+            "metadata": {
+                "description": "Should the deployed Azure SQL Server have an Azure Active Directory based user / group configured as an Administrator"
+            }
+        },
+        "AADAdminLogin": {
+            "type": "string",
+            "metadata": {
+                "description": "The Login ID for the Azure Active Directory user or group to be a server admin"
+            },
+            "defaultValue": "ignore"
+        },
+        "AADAdminObjectID": {
+            "type": "string",
+            "metadata": {
+                "description": "The Object ID for the Azure Active Directory user or group to be a server admin"
+            },
+            "defaultValue": "ignore"
+        },
+        "AlertSendToEmailAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Custom Email Address for alerts"
+            },
+            "defaultValue": null
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "apiVersion": "2017-05-10",
+            "name": "linkedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "https://raw.githubusercontent.com/jomolesk/uk-official-paas-webapp/linked-deploy/azuredeploy.json",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "baseResourceName": {
+                        "value": "[parameters('baseResourceName')]"
+                    },
+                    "appServiceResourceGroup": {
+                        "value": "[parameters('appServiceResourceGroup')]"
+                    },
+                    "keyVaultResourceGroup": {
+                        "value": "[parameters('keyVaultResourceGroup')]"
+                    },
+                    "storageResourceGroup": {
+                        "value": "[parameters('storageResourceGroup')]"
+                    },
+                    "azureSQLResourceGroup": {
+                        "value": "[parameters('azureSQLResourceGroup')]"
+                    },
+                    "LogsWorkspaceLocation": {
+                        "value": "[parameters('LogsWorkspaceLocation')]"
+                    },
+                    "LogAnalyticsSKU": {
+                        "value": "[parameters('LogAnalyticsSKU')]"
+                    },
+                    "databaseServerName": {
+                        "value": "[parameters('databaseServerName')]"
+                    },
+                    "sqlServerAdminPassword": {
+                        "value": "[parameters('sqlServerAdminPassword')]"
+                    },
+                    "useAADForSQLAdmin": {
+                        "value": "[parameters('useAADForSQLAdmin')]"
+                    },
+                    "AADAdminLogin": {
+                        "value": "[parameters('AADAdminLogin')]"
+                    },
+                    "AADAdminObjectID": {
+                        "value": "[parameters('AADAdminObjectID')]"
+                    },
+                    "AlertSendToEmailAddress": {
+                        "value": "[parameters('AlertSendToEmailAddress')]"
+                    }
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}
